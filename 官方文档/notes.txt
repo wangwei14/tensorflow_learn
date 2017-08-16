@@ -1,0 +1,65 @@
+-----------------7.5---------------------
+graph:使用图(graph)来表示计算任务.
+op:图中的节点被称之为op(operation).使用feed和fetch可以为任意的操作赋值或者从其中获取数据.
+tensor:看作是一个n维的数组或列表. 一个tensor包含一个静态类型rank, 和一个shape.
+session:在被称之为会话(Session)的上下文(context)中执行图.
+
+
+
+1.一个 op 获得 0 个或多个 Tensor, 执行计算, 产生 0 个或多个 Tensor.
+2.在 Python 语言中, 返回的 tensor 是 numpy ndarray 对象.
+3.TensorFlow 程序通常被组织成一个构建阶段和一个执行阶段. 在构建阶段, op 的执行步骤 被描述成一个图. 在执行阶段, 使用会话执行执行图中的 op.
+4.构建图  (in test1.py)
+5.在一个会话中启动图  (in test1.py)
+6.交互式使用  为了便于使用诸如 IPython 之类的 Python 交互环境, 可以使用 InteractiveSession 代替 Session 类, 使用 Tensor.eval() 和 Operation.run() 方法代替 Session.run(). 这样可以避免使用一个变量来持有会话.  (in test2.py)
+7.变量  (in test2.py)
+	when run one op, ops and variables related to the op are run too
+8.Fetch  可以取回多个 tensor.  (in test2.py)
+9.Feed  tf.placeholder() 为这些操作创建占位符.  (in test2.py)
+
+
+
+-----------------7.6---------------------
+1.在这一节中我们将建立一个拥有一个线性层的softmax回归模型.
+下载下来的数据集被分成两部分：60000行的训练数据集（mnist.train）和10000行的测试数据集（mnist.test）.
+比如训练数据集的图片是 mnist.train.images ，训练数据集的标签是 mnist.train.labels.
+从这个角度来看，MNIST数据集的图片就是在784维向量空间里面的点.
+在MNIST训练数据集中，mnist.train.images 是一个形状为 [60000, 784] 的张量.
+在此张量里的每一个元素，都表示某张图片里的某个像素的强度值，值介于0和1之间.
+mnist.train.labels 是一个 [60000, 10] 的数字矩阵(one-hot vectors).
+y = softmax(Wx + b)
+
+2.在下一节，我们会将其扩展为一个拥有多层卷积网络的softmax回归模型.
+我们需要创建大量的权重和偏置项.这个模型中的权重在初始化时应该加入少量的噪声来打破对称性以及避免0梯度.由于我们使用的是ReLU神经元，因此比较好的做法是用一个较小的正数来初始化偏置项，以避免神经元节点输出恒为0的问题(dead neurons).
+卷积使用1步长（stride size），0边距(padding size)的模板，保证输出和输入是同一个大小.我们的池化用简单传统的2x2大小的模板做max pooling.
+
+
+
+----------------7.9-----------------------
+1.推理(Inference)
+inference()函数会尽可能地构建图表，做到返回包含了预测结果（output prediction）的Tensor.
+每一层都创建于一个唯一的tf.name_scope之下，创建于该作用域之下的所有元素都将带有其前缀.
+
+2.损失(Loss)
+loss()函数通过添加所需的损失操作，进一步构建图表.
+1-hot values--expand_dims/concat/sparse_to_dense or sparse_softmax_cross_entropy_with_logits
+
+3.训练(Training)
+training()函数添加了通过梯度下降（gradient descent）将损失最小化所需的操作.
+该函数从loss()函数中获取损失Tensor，将其交给tf.scalar_summary，后者在与SummaryWriter配合使用时，可以向事件文件（events file）中生成汇总值（summary values）.
+
+4.保存检查点(checkpoint)
+saver = tf.train.Saver()
+saver.save()
+saver.restore()
+
+
+
+----------------7.9-----------------------
+1.word embeddings -- Skip-gram 模型
+现在我们把目标单词的左右单词视作一个上下文， 使用大小为1的窗口，这样就得到这样一个由(上下文, 目标单词) 组成的数据集.
+前文提到Skip-Gram模型是把目标单词和上下文颠倒过来，所以在这个问题中，举个例子，就是用'quick'来预测 'the' 和 'brown' ，用 'brown' 预测 'quick' 和 'brown' 。因此这个数据集就变成由(输入, 输出)组成的：(quick, the), (quick, brown), (brown, quick), (brown, fox), ...
+embed = tf.nn.embedding_lookup(embeddings, train_inputs)
+loss = tf.reduce_mean(tf.nn.nce_loss(nce_weights, nce_biases, train_labels, embed, num_sampled, vocabulary_size))
+
+

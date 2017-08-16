@@ -1,0 +1,46 @@
+------------------7.10------------
+1.hello world & basic implementatons
+
+2.nearest_neighbor
+L1 Norm Distance
+Broadcasting in tf.add
+
+------------------7.11------------
+3.linear regression
+Primary(One) Function
+cost = Sigma((wX + b - Y) ^ 2) / (2 * X.length)
+
+4.logistic regression
+softmax
+cost = Mean(-Sigma(y * Log(predict_y)))
+
+5.MLP -- multilayer perceptron
+tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y)
+hidden layers
+
+6.CNN -- convolutional neural networks
+tf.nn.conv2d(x, W, strides=[1, strides, strides, 1], padding='SAME')
+tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME')
+
+------------------7.14------------
+7.LSTM -- long-short term memory
+# Current data input shape: (batch_size, n_steps, n_input)
+# Required shape: 'n_steps' tensors list of shape (batch_size, n_input)
+x = tf.unstack(x, n_steps, 1)
+
+class tf.contrib.rnn.BasicLSTMCell / class tf.nn.rnn_cell.BasicLSTMCell
+tf.contrib.rnn.static_rnn / tf.nn.static_rnn
+
+------------------7.14------------
+8.bi-RNN -- bidirectional
+tf.contrib.rnn.static_bidirectional_rnn / tf.nn.static_bidirectional_rnn
+
+9.d-RNN -- dynamic???
+Generate sequence of data with dynamic length.
+outputs, states = tf.contrib.rnn.static_rnn(lstm_cell, x, dtype=tf.float32,
+                                sequence_length=seqlen)
+
+10.AutoEncoder
+encoder & decoder  x->x
+
+
